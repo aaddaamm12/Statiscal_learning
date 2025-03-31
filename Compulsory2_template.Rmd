@@ -1,0 +1,186 @@
+---
+title: "Compulsory Exercise 2: Title (give your project an informative title)"
+author:
+- Full name for group member \#1.
+- Full name for group member \#2.
+- Full name for group member \#3.
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes: \usepackage{amsmath}
+output:
+  # html_document:
+  #   toc: no
+  #   toc_depth: '2'
+  #   df_print: paged
+  pdf_document:
+    toc: no
+    toc_depth: '2'
+urlcolor: blue
+abstract: "This is the place for your abstract (max 350 words)"
+---
+  
+```{r setup, include=FALSE}
+library(knitr)
+# Feel free to change the setting as you see fit
+knitr::opts_chunk$set(echo = TRUE,
+                      tidy = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      strip.white = TRUE,
+                      prompt = FALSE,
+                      cache = TRUE,
+                      size = "scriptsize",
+                      fig.width = 4,
+                      fig.height = 3,
+                      fig.align = "center")
+
+```
+
+```{r, eval=TRUE, echo=FALSE}
+library("knitr")
+library("rmarkdown")
+```
+
+<!--  Etc (load all packages needed). -->
+
+
+## Introduction: Scope and purpose of your project
+
+
+## Descriptive data analysis/statistics
+```{r}
+data <- read.csv("~/heart.csv")
+
+head(data)
+
+summary(data)
+```
+```{r}
+# standardization of numeric columns
+numeric_columns <- sapply(data, is.numeric)
+numeric_columns["HeartDisease"] <- FALSE
+print(numeric_columns)
+data[numeric_columns] <- scale(data[numeric_columns])
+
+
+
+summary(data)
+```
+```{r}
+
+data[] <- lapply(data, function(x) {
+  if (is.character(x) || is.factor(x)) {
+    as.numeric(factor(x)) - 1  
+  } else {
+    x
+  }
+})
+
+str(data)
+```
+##KNN(pour moi)
+
+
+```{r}
+data$HeartDisease <- as.factor(data$HeartDisease)
+
+
+split <- sample(1:nrow(data), size = 0.8 * nrow(data))
+train_data <- data[split, ]
+test_data <- data[-split, ] # or validation if cv
+
+```
+
+
+## Logistic Regression
+
+```{r}
+model <- glm(HeartDisease ~ ., data = train_data, family = binomial)
+summary(model)
+```
+
+```{r}
+predictions <- predict(model, test_data, type = "response")
+
+# if the probability is > 0.5, predict heart_disease.
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+
+# confusion matrix
+confusion_matrix <- table(Predicted = predicted_classes, Actual = test_data$HeartDisease)
+print(confusion_matrix)
+
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+print(paste("Accuracy:", round(accuracy * 100, 2), "%"))
+
+TN <- confusion_matrix[1,1]  # True Negatives
+FP <- confusion_matrix[1,2]  # False Positives
+FN <- confusion_matrix[2,1]  # False Negatives
+TP <- confusion_matrix[2,2]  # True Positives
+
+# Precision
+precision <- TP / (TP + FP)
+print(paste("Precision:", round(precision * 100, 2), "%"))
+
+# Recall
+recall <- TP / (TP + FN)
+print(paste("Recall:", round(recall * 100, 2), "%"))
+```
+
+
+
+```{r}
+# train test curve
+library(ggplot2)
+
+train_sizes <- seq(0.1, 1.0, by = 0.1)  # 10% to 100% of training data
+train_errors <- c()
+test_errors <- c()
+
+for (size in train_sizes) {
+  # Sample a subset of the training data
+  sample_indices <- sample(1:nrow(train_data), size = floor(size * nrow(train_data)))
+  train_subset <- train_data[sample_indices, ]
+  
+  # Train the model on each subset
+  model_subset <- glm(HeartDisease ~ ., data = train_subset, family = binomial)
+  
+  # train errors
+  train_predictions <- predict(model_subset, train_subset, type = "response")
+  train_predicted_classes <- ifelse(train_predictions > 0.5, 1, 0)
+  train_conf_matrix <- table(Predicted = train_predicted_classes, Actual = train_subset$HeartDisease)
+  train_accuracy <- sum(diag(train_conf_matrix)) / sum(train_conf_matrix)
+  train_errors <- c(train_errors, 1 - train_accuracy) 
+
+  # Test errors
+  test_predictions <- predict(model_subset, test_data, type = "response")
+  test_predicted_classes <- ifelse(test_predictions > 0.5, 1, 0)
+  test_conf_matrix <- table(Predicted = test_predicted_classes, Actual = test_data$HeartDisease)
+  test_accuracy <- sum(diag(test_conf_matrix)) / sum(test_conf_matrix)
+  test_errors <- c(test_errors, 1 - test_accuracy) 
+}
+
+error_data <- data.frame(
+  TrainSize = rep(train_sizes, 2),
+  Error = c(train_errors, test_errors),
+  Set = rep(c("Train", "Test"), each = length(train_sizes))
+)
+
+# Plot the error curve
+ggplot(error_data, aes(x = TrainSize, y = Error, color = Set)) +
+  geom_line() + geom_point() +
+  labs(title = "Train vs. Test Error Curve", x = "Training Set Proportion", y = "Error (1 - Accuracy)") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Predicted Probabilities Distribution",
+       x = "Predicted Probability",
+       fill = "Actual Class") +
+  theme_minimal()
+```
+
+## Results and interpretation
+
+
+## Summary

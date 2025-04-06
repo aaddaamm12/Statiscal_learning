@@ -40,13 +40,13 @@ library("knitr")
 library("rmarkdown")
 ```
 
-<!--  Etc (load all packages needed). -->
+# Abstract
 
 
-## Introduction: Scope and purpose of your project
+# Introduction
 
 
-## Descriptive data analysis/statistics
+# Descriptive data analysis/statistics
 ```{r}
 data <- read.csv("~/heart.csv")
 
@@ -77,8 +77,16 @@ data[] <- lapply(data, function(x) {
 
 str(data)
 ```
+
+# Methods
+
+In this part, we are going to use three types of methods : KNN, logistic regression and tree based methods.
+
+For each methods, we will use the misclassification error.
+
 ##KNN(pour moi)
 
+- how its works, strenght weakness
 
 ```{r}
 data$HeartDisease <- as.factor(data$HeartDisease)
@@ -92,6 +100,9 @@ test_data <- data[-split, ] # or validation if cv
 
 
 ## Logistic Regression
+
+- how its works, strenght weakness
+
 
 ```{r}
 model <- glm(HeartDisease ~ ., data = train_data, family = binomial)
@@ -180,13 +191,13 @@ ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
   theme_minimal()
 ```
 
-##
-
-
 
 ## Tree based methods
 
 In this part, we will use methods related to trees. We will take the variable "HeartDisease" as a target variable, and all the other variables are predictors.
+
+- how its works, strenght weakness
+
 
 We will first show a representation of the initial tree.
 ```{r, echo=FALSE}
@@ -426,5 +437,11 @@ We tried the parameters tuning and the XGBoost too, but the results were not goo
 
 # Results and interpretation
 
+Table of comparison of all the misclassification error :
+
+
+The most important parameters are as a consequence :
+
+Limitations : 
 
 # Summary

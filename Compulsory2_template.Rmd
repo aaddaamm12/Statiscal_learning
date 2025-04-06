@@ -50,9 +50,9 @@ library("rmarkdown")
 ```{r}
 data <- read.csv("~/heart.csv")
 
-head(data)
+#head(data)
 
-summary(data)
+#summary(data)
 ```
 ```{r}
 # standardization of numeric columns
@@ -180,7 +180,251 @@ ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
   theme_minimal()
 ```
 
-## Results and interpretation
+##
 
 
-## Summary
+
+## Tree based methods
+
+In this part, we will use methods related to trees. We will take the variable "HeartDisease" as a target variable, and all the other variables are predictors.
+
+We will first show a representation of the initial tree.
+```{r, echo=FALSE}
+# Visualization of the tree
+set.seed(123)
+#install.packages("tree")
+library(tree)
+library(caret)
+```
+```{r}
+data_tree = tree(HeartDisease~., data=train_data)
+```
+```{r, echo=FALSE}
+plot(data_tree,type="uniform")
+text(data_tree,  cex = 0.5)
+#par(mfrow=c(1,2),pty="s")
+tree.pred <- predict(data_tree, newdata = test_data, type = "class")
+confMat <- confusionMatrix(as.factor(tree.pred), as.factor(test_data$HeartDisease))
+print(confMat$table)
+error_rate <- 1 - sum(diag(confMat$table)) / sum(confMat$table)
+print(paste("Classification Error Rate:", round(error_rate, 4)))
+```
+
+The first error rate that we obtain with this method is not bad, we are way under 0.5, but it is still not low enough to consider that we have a good prediction. We would like the error value to be lowest possible.
+
+```{r specific tree, echo=FALSE, results='hide'}
+# creation of a tree with specific variables
+library(tree)
+data_tree2 = tree(HeartDisease ~ Cholesterol + Age, 
+                   data=train_data, 
+                   control = tree.control(nrow(train_data), mincut=2, minsize=4, mindev=0.001))
+#plot(data_tree2)
+#text(data_tree2,cex=0.8)
+```
+
+After, we are trying to prune the tree, so we are trying to see if we should stop the tree earlier to have better results, because there could be an overfitting.
+
+```{r, echo=FALSE}
+par(mfrow = c(1, 2)) 
+# Cross validation
+set.seed(123)
+```
+```{r}
+cv.data <- cv.tree(data_tree,K=5)
+plot(cv.data$dev ~  cv.data$size,type= "b", lwd=2, col="red", xlab="Tree Size", ylab="Deviance")
+prune.data <- prune.tree(data_tree,best=7)
+```
+```{r, echo=FALSE}
+plot(prune.data)
+text(prune.data, ,  cex = 0.6)
+par(mfrow = c(1, 1))
+```
+```{r}
+# Prediction
+prune.pred <- predict(prune.data, newdata = test_data, type = "class")
+confMat <- confusionMatrix(as.factor(prune.pred), as.factor(test_data$HeartDisease))
+print(confMat$table)
+error_rate <- 1 - sum(diag(confMat$table)) / sum(confMat$table)
+print(paste("Classification Error Rate:", round(error_rate, 4)))
+```
+Indeed, a tree with 7 leaves performs best and we see that the error is lower than with the normal tree.
+
+Now, we will split the data with the cross entropy and after the Gini index.
+
+```{r}
+tree.data <- tree(HeartDisease ~ ., data = train_data, split = "deviance") # cross entropy
+```
+```{r, echo=FALSE}
+#summary(tree.data)
+#plot(tree.data,type="proportional")
+#text(tree.data,pretty=1)
+```
+```{r}
+tree.datag <- tree(HeartDisease ~ ., data = train_data, split = "gini") # Gini index
+```
+```{r, echo=FALSE}
+#summary(tree.datag)
+#plot(tree.datag,type="proportional")
+#text(tree.datag,pretty=1)
+```
+The number of terminal nodes for the cross entropy splitting is 12 and for the Gini index it is 73, which is a lot, this could be overfitting.
+
+```{r, echo=FALSE}
+library(caret)
+```
+```{r}
+# Prediction for cross entropy
+tree_pred <- predict(tree.data, test_data, type="class")
+confMat <- confusionMatrix(tree_pred, reference=test_data$HeartDisease)
+print(confMat$table)
+error_rate <- 1 - sum(diag(confMat$table)) / sum(confMat$table)
+print(paste("Classification Error Rate:", round(error_rate, 4)))
+# Prediction for gini index
+tree_predg <- predict(tree.datag, test_data, type="class")
+confMatg <- confusionMatrix(tree_predg, reference=test_data$HeartDisease)
+print(confMatg$table)
+error_rate <- 1 - sum(diag(confMatg$table)) / sum(confMatg$table)
+print(paste("Classification Error Rate:", round(error_rate, 4)))
+```
+Indeed, now we see that the prediction is better for the split with the cross entropy method than for the Gini index.
+
+Now, we will use more complex methods like adaboost, the bagging and random forest methods to try having the lowest error possible.
+
+```{r, echo=FALSE}
+library(randomForest)
+set.seed(123)
+```
+```{r}
+#BAGGING
+bag_model <- randomForest(HeartDisease ~ ., data = train_data,
+                          mtry = 10, ntree = 500, importance = TRUE)
+
+# confusion matrix
+bag_pred <- predict(bag_model, newdata = test_data)
+conf_bag <- table(bag_pred, test_data$HeartDisease)
+```
+```{r, echo=FALSE}
+print(conf_bag)
+err_bag <- 1 - sum(diag(conf_bag)) / sum(conf_bag)
+cat("Classification error (Bagging) :", round(err_bag, 4), "\n")
+```
+
+```{r}
+#RANDOM FOREST
+set.seed(123)
+rf_model <- randomForest(HeartDisease ~ ., data = train_data,
+                         mtry = 3, ntree = 500, importance = TRUE)
+
+# Confusion matrix
+rf_pred <- predict(rf_model, newdata = test_data)
+conf_rf <- table(rf_pred, test_data$HeartDisease)
+```
+```{r, echo=FALSE}
+print(conf_rf)
+err_rf <- 1 - sum(diag(conf_rf)) / sum(conf_rf)
+cat("Classification error (Random Forest) :", round(err_rf, 4), "\n")
+```
+```{r, echo=FALSE}
+par(mfrow = c(1, 2))
+varImpPlot(bag_model, main = "Bagging (mtry = 10)", pch = 20)
+varImpPlot(rf_model, main = "Random Forest (mtry = 3)", pch = 20)
+par(mfrow = c(1, 1))
+```
+Both of the methods are giving a lower error value than previously, but the random forest is still better. Moreover, we see that the two methods don't have exactly the same order of the more important parameters to predict the disease of the heart, but it is still quite the same. It seems that ST slope is the most important factor to predict the heart disease, then Cholesterol and type of the chest pain are also very important.
+
+We will finally use the Ada Boost method.
+
+```{r, echo=FALSE}
+library(ada)
+library(caret)
+set.seed(123)
+```
+```{r}
+r.ada <-ada(HeartDisease~.,train_data,iter=400,type="discrete",loss="ada",control=rpart.control())
+#plot(r.ada)
+#ada boost test error
+ada.pred <- predict(r.ada,newdata=test_data)
+confMat_ada <- confusionMatrix(as.factor(ada.pred), as.factor(test_data$HeartDisease))
+print(confMat_ada$table)
+error_ada <- 1 - sum(diag(confMat_ada$table)) / sum(confMat_ada$table)
+print(error_ada)
+```
+
+Ada Boost gives a low error but the random forest method is a little bit better.
+
+To conclude on all the tree methods that we tried, the random forest is the one that can predict the lower error.
+
+```{r parameter tuning, results='hide', echo=FALSE}
+library(gbm) # for original implementation of regular and stochastic GBMs
+library(rsample) #to subsample training and test sets
+
+#run a basic GBM model
+set.seed(123) # for reproducibility
+heart_gbm1 <-gbm(formula= HeartDisease ~ .,
+                data= train_data, distribution= "gaussian", #SSE loss function
+            n.trees= 3000,
+            shrinkage= 0.1, #learning rate
+            interaction.depth= 3,
+            n.minobsinnode= 10, #minimual number of observations interminal nodes
+            cv.folds= 10,
+            bag.fraction=1 #The default is 0.5, but here we want to have all data in each iteration
+            )
+(best <-which.min(heart_gbm1$cv.error))
+sqrt(heart_gbm1$cv.error[best])
+#gbm.perf(heart_gbm1, method = "cv")
+  
+set.seed(123) # for reproducibility
+heart_gbm2 <-gbm(formula= HeartDisease ~ ., data= train_data,
+                 distribution= "gaussian", #SSE loss function
+                 n.trees= 3000,
+                 shrinkage= 0.1, #learning rate
+                 interaction.depth= 3,
+                 n.minobsinnode= 10, #minimualnumber of observationsinterminalnodes
+                 cv.folds= 10,
+                 bag.fraction=0.5)
+```
+
+```{r xgboost, results='hide', echo=FALSE}
+library(xgboost)
+library(recipes)
+
+#Training data and response
+xgb_prep<- recipe(HeartDisease ~ ., data = train_data) %>%
+  step_integer(all_nominal()) %>%
+  prep(training = train_data, retain = TRUE) %>%
+  juice()
+
+X <-as.matrix(xgb_prep[setdiff(names(xgb_prep),"HeartDisease")])
+Y <-xgb_prep$HeartDisease
+
+#Test data and test response
+xgb_prep_test <- recipe(HeartDisease ~ ., data = test_data) %>%
+  step_integer(all_nominal()) %>%
+  prep(training = test_data, retain = TRUE) %>%
+  juice()
+X_test <-as.matrix(xgb_prep_test[setdiff(names(xgb_prep_test), "HeartDisease")])
+Y_test <-xgb_prep_test$HeartDisease
+ 
+set.seed(123)
+heart_xgb <-xgboost(data= X, label= Y,
+                    nrounds= 6000,
+                    objective= "reg:squarederror",
+                    early_stopping_rounds= 50,
+                    params= list(eta= 0.01, #learningrate(wecall it$\nu$)
+                                 lambda=0.1, #L2regularization te
+                                 max_depth= 6,
+                                 min_child_weight= 3,
+                                 subsample= 0.8, #Proportion of data pointsusedforeachtree
+                                 colsample_bytree= 0.5, #subsample ratioofcolumnswhen constructingonetree
+                                 nthread=12),
+                    verbose= 0)
+X.pred.test <-predict(heart_xgb,newdata= X_test)
+sqrt(sum((X.pred.test-Y_test)^2)/nrow(X_test))
+```
+
+We tried the parameters tuning and the XGBoost too, but the results were not good, with an error around 0.3.
+
+# Results and interpretation
+
+
+# Summary

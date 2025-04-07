@@ -588,7 +588,7 @@ Table of comparison of all the misclassification error :
 
 | Method              | Misclassification error |
 |---------------------|-------------------------|
-| KNN                 | 0.                    |
+| KNN                 | 0.1359                  |
 | Logistic Regression | 0.                    |
 | Decision Tree       | 0.1739                  |
 | Pruning Tree        | 0.1685                  |

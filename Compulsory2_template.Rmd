@@ -1,5 +1,5 @@
 ---
-title: "Compulsory Exercise 2: Compulsory Exercise 2: Study of an Heart Disease"
+title: "Compulsory Exercise 2: Compulsory Exercise 2: Study of Heart Disease"
 author:
 - Adam DJAROUD
 - Antoine REILHES
@@ -102,11 +102,11 @@ Here is a concrete explanation of the meaning of all the parameters of this data
 
 - OldPeak : ST Depression Induced by Exercise Relative to Rest.
 
-- Sex : coded as M/F or 0/1.
+- Sex : binary.
 
 - ChestPainType : Type of Chest Pain with categories Typical Angina, Atypical Angina, Non-anginal Pain and Asymptomatic.
 
-- FastingBS : Fasting Blood Sugar > 120 mg/dL whi is binary.
+- FastingBS : Fasting Blood Sugar > 120 mg/dL which is binary.
 
 - RestingECG : Resting Electrocardiogram Results.
 

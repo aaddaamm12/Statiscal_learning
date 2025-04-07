@@ -167,58 +167,7 @@ plot_combined_three_col
 ```
 
 
-Here are the distribution of the quantitative variables.
-```{r, fig.width=9, fig.height=6, echo=FALSE}
-plot8<-ggplot(data, aes(x = Cholesterol, fill = factor(HeartDisease))) +
-  geom_density(alpha = 0.5) +
-  labs(title = "cholesterol depending HD", 
-       x = "Cholesterol", fill = "HeartDisease") +
-  theme_minimal()
-plot9<-ggplot(data, aes(x = Age, fill = factor(HeartDisease))) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Age depending HD", 
-       x = "Age", fill = "HeartDisease") +
-  theme_minimal()
-plot10<-ggplot(data, aes(x = RestingBP, fill = factor(HeartDisease))) +
-  geom_density(alpha = 0.5) +
-  labs(title = "RestingBP depending HD", 
-       x = "RestingBP", fill = "HeartDisease") +
-  theme_minimal()
-plot11<-ggplot(data, aes(x = MaxHR, fill = factor(HeartDisease))) +
-  geom_density(alpha = 0.5) +
-  labs(title = "MaxHR depending HD", 
-       x = "MaxHR", fill = "HeartDisease") +
-  theme_minimal()
-plot12<-ggplot(data, aes(x = Oldpeak, fill = factor(HeartDisease))) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Oldpeak depending HD", 
-       x = "Oldpeak", fill = "HeartDisease") +
-  theme_minimal()
-
-reduce_text_size <- function(p, size = 8) {
-  p + theme(title = element_text(size = size),
-            axis.title.x = element_text(size = size - 1),
-            axis.title.y = element_text(size = size - 1),
-            axis.text.x = element_text(size = size - 2),
-            axis.text.y = element_text(size = size - 2),
-            legend.text = element_text(size = size - 2),
-            legend.title = element_text(size = size - 2))
-}
-
-plot8_small <- reduce_text_size(plot8)
-plot9_small <- reduce_text_size(plot9)
-plot10_small <- reduce_text_size(plot10)
-plot11_small <- reduce_text_size(plot11)
-plot12_small <- reduce_text_size(plot12)
-
-plot_combined_three_col <- plot8_small + plot9_small + plot10_small +
-  plot11_small + plot12_small +
-  plot_layout(ncol = 3, widths = c(1, 1, 1))
-
-plot_combined_three_col
-```
-
-Correlation between quantitative variables.
+And here are the distribution and the correlation between quantitative variables.
 ```{r, echo=FALSE}
 library(GGally)
 library(ggplot2)
@@ -290,7 +239,7 @@ cat("Best k chosen by CV:", best_k)
 
 
 ```
-The best k was selected based on accuracy which is the proportion of correctly classified test samples.We have also the misclassification error: 1 − Accuracy
+The best k was selected based on accuracy which is the proportion of correctly classified test samples.We have also the misclassification error: 1 - Accuracy
  which shows how often the model misclassifies. Under, we show the results (confusion matrix, accuracy and misclassification error) for the best K.
 
 ```{r}

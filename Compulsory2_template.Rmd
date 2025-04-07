@@ -519,7 +519,7 @@ set.seed(123)
 ```{r}
 cv.data <- cv.tree(data_tree,K=5)
 plot(cv.data$dev ~  cv.data$size,type= "b", lwd=2, col="red", xlab="Tree Size", ylab="Deviance")
-prune.data <- prune.tree(data_tree,best=7)
+prune.data <- prune.tree(data_tree,best=4)
 ```
 ```{r, echo=FALSE}
 plot(prune.data)
@@ -534,7 +534,7 @@ print(confMat$table)
 error_rate <- 1 - sum(diag(confMat$table)) / sum(confMat$table)
 print(paste("Classification Error Rate:", round(error_rate, 4)))
 ```
-Indeed, a tree with 7 leaves performs best and we see that the error is lower than with the normal tree.
+A tree with 4 leaves performs not better than the normal tree, maybe because there are no overfitting in this case.
 
 **Decision Trees with Gini vs. Entropy Splitting**
 

@@ -5,7 +5,12 @@ author:
 - Full name for group member \#2.
 - Full name for group member \#3.
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-header-includes: \usepackage{amsmath}
+header-includes: 
+  - \usepackage{amsmath}
+  - \geometry{a4paper, margin=0.7in}
+  - \usepackage{titlesec}
+  - \titlespacing{\section}{0pt}{1pt}{1pt}
+  - \titlespacing{\subsection}{0pt}{1pt}{1pt} 
 output:
   # html_document:
   #   toc: no
@@ -81,6 +86,7 @@ str(data)
 
 In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.
 
+Here are histograms for the qualitative variables.
 ```{r, echo=FALSE}
 library(ggplot2)
 library(gridExtra)
@@ -128,6 +134,7 @@ plot7<-ggplot(data, aes(x = ST_Slope, fill = factor(HeartDisease))) +
 grid.arrange(plot1,plot2,plot3,plot4,plot5,plot6,plot7, ncol=4)
 ```
 
+Here are the distribution of the quantitative variables.
 ```{r, echo=FALSE}
 plot8<-ggplot(data, aes(x = Cholesterol, fill = factor(HeartDisease))) +
   geom_density(alpha = 0.5) +
@@ -157,7 +164,7 @@ plot12<-ggplot(data, aes(x = Oldpeak, fill = factor(HeartDisease))) +
 grid.arrange(plot8,plot9,plot10,plot11,plot12, ncol=5)
 ```
 
-Correlation between quantitatives variables.
+Correlation between quantitative variables.
 ```{r, echo=FALSE}
 library(GGally)
 library(ggplot2)
@@ -169,7 +176,7 @@ pm <- ggpairs(data,
 print(pm)
 ```
 
-##KNN
+## KNN
 
 In this part, we will use the KNN method. KNN is a non-parametric method where a data point is classified based on the majority vote of its K nearest neighbors in the feature space. The choice of K is crucial for performance. This is why the first thing is to find the best K
 

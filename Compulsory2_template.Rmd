@@ -1,5 +1,5 @@
 ---
-title: "Compulsory Exercise 2: Title (give your project an informative title)"
+title: "Compulsory Exercise 2: Compulsory Exercise 2: Study of an Heart Disease"
 author:
 - Adam DJAROUD
 - Antoine REILHES
@@ -90,6 +90,32 @@ data[] <- lapply(data, function(x) {
 ```
 
 In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.
+Here is a concrete explanation of the meaning of all the parameters of this dataset :
+
+- Age : Age (in years)
+
+- RestingBP : Resting Blood Pressure, measured in mmHg, taken while the patient is at rest.
+
+- Cholesterol : Serum Cholesterol in mg/dL.
+
+- MaxHR : Maximum Heart Rate Achieved during exercise stress test.
+
+- OldPeak : ST Depression Induced by Exercise Relative to Rest.
+
+- Sex : coded as M/F or 0/1.
+
+- ChestPainType : Type of Chest Pain with categories Typical Angina, Atypical Angina, Non-anginal Pain and Asymptomatic.
+
+- FastingBS : Fasting Blood Sugar > 120 mg/dL whi is binary.
+
+- RestingECG : Resting Electrocardiogram Results.
+
+- ExerciseAngina : Exercise-Induced Angina which is binary.
+
+- ST_Slope : Slope of the Peak Exercise ST Segment which can be Upsloping, Flat or Downsloping.
+
+- HeartDisease : Presence of Heart Disease, which is binary.
+
 
 Here are histograms for the qualitative variables.
 ```{r, fig.width=9, fig.height=6, echo=FALSE}
@@ -182,6 +208,8 @@ pm <- ggpairs(data,
               mapping = aes(color = factor(HeartDisease)))
 print(pm)
 ```
+There seems to be no correlation between two variables, it means that changes in one variable do not systematically correspond to changes in the other, they vary independently of each other.
+
 
 ## KNN
 
@@ -757,6 +785,9 @@ cat("AUC Random Forest :", auc(roc.rf), "\n")
 cat("AUC AdaBoost :", auc(roc.ada), "\n")
 cat("AUC Logistic :", auc(roc.glm), "\n")
 ```
+The ROC curves show a quite good prediction for all the methods, because for each, the cruve is far from the diagonal curve, which represent randomness.
+
+The logistic regression, which can be considered as the best prdictive method for a heart disease, has for most important parameters Sex, the type of pain in the chest, Cholesterol, Fasting Blood Sugar, Slope of the Peak Exercise ST Segment and Exercise-Induced Angina. These sydroms, all included, can give a chance of knowing whether or not a patient has a heart disease.
 
 For this study the main metric that was used is accuracy. However, in this particular context a false positive doesn’t have the same severity as a false negative.
 A false positive is less of a serious issue than a false negative : for instance, since the predictive tool here is a pre-diagnosis tool, predicting a false negative is not really impactful. The patient would then be brought for further analysis and experts could detect that he is healthy. 

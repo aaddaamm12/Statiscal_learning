@@ -87,10 +87,11 @@ str(data)
 In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.
 
 Here are histograms for the qualitative variables.
-```{r, echo=FALSE}
+```{r, fig.width=9, fig.height=6, echo=FALSE}
 library(ggplot2)
 library(gridExtra)
-#quantitative
+
+# Crée les graphiques comme précédemment
 plot1 <- ggplot(data, aes(x = factor(Sex))) +
   geom_bar(fill = "steelblue") +
   labs(title = "Heart disease", x = "Heart disease", y = "Number") +
@@ -106,7 +107,7 @@ plot2 <- ggplot(data, aes(x = ChestPainType, fill = factor(HeartDisease))) +
 plot3 <- ggplot(data, aes(x = Sex, fill = factor(HeartDisease))) +
   geom_bar(position = "dodge") +
   labs(title = "Type of thoracic pain depending HD",
-       x = "Type of thoracic pain", y = "Number of observations",
+       x = "Type of thoracic pain",
        fill = "HD") +
   theme_minimal()
 
@@ -137,11 +138,37 @@ plot7 <- ggplot(data, aes(x = ST_Slope, fill = factor(HeartDisease))) +
        x = "ST_Slope",
        fill = "HD") +
   theme_minimal()
-grid.arrange(plot1,plot2,plot3,plot4,plot5,plot6,plot7, ncol=4)
+
+library(patchwork)
+reduce_text_size <- function(p, size = 8) {
+  p + theme(title = element_text(size = size),
+            axis.title.x = element_text(size = size - 1),
+            axis.title.y = element_text(size = size - 1),
+            axis.text.x = element_text(size = size - 2),
+            axis.text.y = element_text(size = size - 2),
+            legend.text = element_text(size = size - 2),
+            legend.title = element_text(size = size - 2))
+}
+
+plot1_small <- reduce_text_size(plot1)
+plot2_small <- reduce_text_size(plot2)
+plot3_small <- reduce_text_size(plot3)
+plot4_small <- reduce_text_size(plot4)
+plot5_small <- reduce_text_size(plot5)
+plot6_small <- reduce_text_size(plot6)
+plot7_small <- reduce_text_size(plot7)
+
+
+plot_combined_three_col <- plot1_small + plot2_small + plot3_small +
+  plot4_small + plot5_small + plot6_small + plot7_small +
+  plot_layout(ncol = 4, widths = c(1, 1, 1))
+
+plot_combined_three_col
 ```
 
+
 Here are the distribution of the quantitative variables.
-```{r, echo=FALSE}
+```{r, fig.width=9, fig.height=6, echo=FALSE}
 plot8<-ggplot(data, aes(x = Cholesterol, fill = factor(HeartDisease))) +
   geom_density(alpha = 0.5) +
   labs(title = "cholesterol depending HD", 
@@ -167,7 +194,28 @@ plot12<-ggplot(data, aes(x = Oldpeak, fill = factor(HeartDisease))) +
   labs(title = "Oldpeak depending HD", 
        x = "Oldpeak", fill = "HeartDisease") +
   theme_minimal()
-grid.arrange(plot8,plot9,plot10,plot11,plot12, ncol=5)
+
+reduce_text_size <- function(p, size = 8) {
+  p + theme(title = element_text(size = size),
+            axis.title.x = element_text(size = size - 1),
+            axis.title.y = element_text(size = size - 1),
+            axis.text.x = element_text(size = size - 2),
+            axis.text.y = element_text(size = size - 2),
+            legend.text = element_text(size = size - 2),
+            legend.title = element_text(size = size - 2))
+}
+
+plot8_small <- reduce_text_size(plot8)
+plot9_small <- reduce_text_size(plot9)
+plot10_small <- reduce_text_size(plot10)
+plot11_small <- reduce_text_size(plot11)
+plot12_small <- reduce_text_size(plot12)
+
+plot_combined_three_col <- plot8_small + plot9_small + plot10_small +
+  plot11_small + plot12_small +
+  plot_layout(ncol = 3, widths = c(1, 1, 1))
+
+plot_combined_three_col
 ```
 
 Correlation between quantitative variables.

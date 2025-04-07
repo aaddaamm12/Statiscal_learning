@@ -733,15 +733,15 @@ Table of comparison of all the misclassification error :
 |---------------------|-------------------------|
 | KNN                 | 0.1359                  |
 | Logistic Regression | 0.1087                  |
-| Decision Tree       | 0.1739                  |
-| Pruning Tree        | 0.1685                  |
-| Entropy             | 0.1739                  |
-| Gini                | 0.2554                  |
+| Decision Tree       | 0.1359                  |
+| Pruning Tree        | 0.1522                  |
+| Entropy             | 0.1359                  |
+| Gini                | 0.2228                  |
 | Bagging             | 0.1576                  |
-| Random Forest       | 0.1413                  |
-| AdaBoost            | 0.1576                  |
+| Random Forest       | 0.1467                  |
+| AdaBoost            | 0.1522                  |
 
-Based on misclassification error, Logistic Regression performed the best with an error of 0.108, followed closely by K-Nearest Neighbors (KNN) at 0.1359, and Random Forest at 0.1413. These methods show strong predictive performance for the classification task. Ensemble methods like Bagging and AdaBoost had slightly higher errors (~0.1576), while single decision trees (including Entropy, Gini, and Pruned Tree) generally underperformed, with Gini showing the worst result at 0.2554. In terms of computational cost, Logistic Regression is lightweight and interpretable, whereas KNN requires more memory and time for large datasets. Tree-based methods and ensembles are more flexible and better at capturing complex relationships but can be computationally heavier and less interpretable. Overall, Logistic Regression offered the best balance between simplicity, performance, and generalizability in this case.
+Based on misclassification error, Logistic Regression performed the best with an error of 0.108, followed closely by K-Nearest Neighbors (KNN) at 0.1359, and Random Forest at 0.1467. These methods show strong predictive performance for the classification task. Ensemble methods like Bagging and AdaBoost had slightly higher errors (~0.1522), while single decision trees (including Entropy, Gini, and Pruned Tree) generally underperformed, with Gini showing the worst result at 0.2228. In terms of computational cost, Logistic Regression is lightweight and interpretable, whereas KNN requires more memory and time for large datasets. Tree-based methods and ensembles are more flexible and better at capturing complex relationships but can be computationally heavier and less interpretable. Overall, Logistic Regression offered the best balance between simplicity, performance, and generalizability in this case.
 
 
 We are going to see a representation of all the ROC curves together.

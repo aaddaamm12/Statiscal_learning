@@ -787,7 +787,7 @@ cat("AUC Logistic :", auc(roc.glm), "\n")
 ```
 The ROC curves show a quite good prediction for all the methods, because for each, the cruve is far from the diagonal curve, which represent randomness.
 
-The logistic regression, which can be considered as the best prdictive method for a heart disease, has for most important parameters Sex, the type of pain in the chest, Cholesterol, Fasting Blood Sugar, Slope of the Peak Exercise ST Segment and Exercise-Induced Angina. These sydroms, all included, can give a chance of knowing whether or not a patient has a heart disease.
+The logistic regression, which can be considered as the best predictive method for a heart disease, has for most important parameters Sex, the type of pain in the chest, Cholesterol, Fasting Blood Sugar, Slope of the Peak Exercise ST Segment and Exercise-Induced Angina. These sydroms, all included, can give a chance of knowing whether or not a patient has a heart disease.
 
 For this study the main metric that was used is accuracy. However, in this particular context a false positive doesn’t have the same severity as a false negative.
 A false positive is less of a serious issue than a false negative : for instance, since the predictive tool here is a pre-diagnosis tool, predicting a false negative is not really impactful. The patient would then be brought for further analysis and experts could detect that he is healthy. 

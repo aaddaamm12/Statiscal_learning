@@ -450,7 +450,7 @@ ggplot(error_data, aes(x = TrainSize, y = Error, color = Set)) +
   labs(title = "Train vs. Test Error Curve", x = "Training Set Proportion", y = "Error (1 - Accuracy)") +
   theme_minimal()
 ```
-Here, we can observe that the test error sees to converge and is much lower than the train error. The model here seems to train well without overfitting on the data as the test error remains lower.
+Here, we can observe that the test error seems to converge and is much lower than the train error. The model here seems to train well without overfitting on the data as the test error remains lower.
 
 Let's now have a look at the probability distribution that is predicted versus the actual class of each of the cases to predict.
 ```{r, echo=FALSE}

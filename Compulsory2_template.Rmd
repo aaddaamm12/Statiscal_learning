@@ -81,6 +81,94 @@ str(data)
 
 In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.
 
+```{r, echo=FALSE}
+library(ggplot2)
+library(gridExtra)
+#quantitative
+plot1<-ggplot(data, aes(x = factor(Sex))) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Heart disease", x = "Heart disease", y = "Number") +
+  theme_minimal()
+plot2<-ggplot(data, aes(x = ChestPainType, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "Sex depending on the presence of the heart disease",
+       x = "Sex",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+plot3<-ggplot(data, aes(x = Sex, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "Type of thoracic pain depending on the presence of the heart disease",
+       x = "Type of thoracic pain", y = "Number of observations",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+plot4<-ggplot(data, aes(x = FastingBS, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "FastingBS depending on the presence of the heart disease",
+       x = "FastingBS",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+plot5<-ggplot(data, aes(x = RestingECG, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "RestingECG depending on the presence of the heart disease",
+       x = "RestingECG",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+plot6<-ggplot(data, aes(x = ExerciseAngina, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "ExerciseAngina depending on the presence of the heart disease",
+       x = "ExerciseAngina",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+plot7<-ggplot(data, aes(x = ST_Slope, fill = factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(title = "ST_Slope depending on the presence of the heart disease",
+       x = "ST_Slope",
+       fill = "Presence of the heart disease") +
+  theme_minimal()
+grid.arrange(plot1,plot2,plot3,plot4,plot5,plot6,plot7, ncol=4)
+```
+
+```{r, echo=FALSE}
+plot8<-ggplot(data, aes(x = Cholesterol, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of cholesterol depending on the presence of the heart disease", 
+       x = "Cholesterol", fill = "HeartDisease") +
+  theme_minimal()
+plot9<-ggplot(data, aes(x = Age, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of Age depending on the presence of the heart disease", 
+       x = "Age", fill = "HeartDisease") +
+  theme_minimal()
+plot10<-ggplot(data, aes(x = RestingBP, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of RestingBP depending on the presence of the heart disease", 
+       x = "RestingBP", fill = "HeartDisease") +
+  theme_minimal()
+plot11<-ggplot(data, aes(x = MaxHR, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of MaxHR depending on the presence of the heart disease", 
+       x = "MaxHR", fill = "HeartDisease") +
+  theme_minimal()
+plot12<-ggplot(data, aes(x = Oldpeak, fill = factor(HeartDisease))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of Oldpeak depending on the presence of the heart disease", 
+       x = "Oldpeak", fill = "HeartDisease") +
+  theme_minimal()
+grid.arrange(plot8,plot9,plot10,plot11,plot12, ncol=5)
+```
+
+Correlation between quantitatives variables.
+```{r, echo=FALSE}
+library(GGally)
+library(ggplot2)
+```
+```{r}
+pm <- ggpairs(data,
+              columns = c("Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"), 
+              mapping = aes(color = factor(HeartDisease)))
+print(pm)
+```
+
 ##KNN
 
 In this part, we will use the KNN method. KNN is a non-parametric method where a data point is classified based on the majority vote of its K nearest neighbors in the feature space. The choice of K is crucial for performance. This is why the first thing is to find the best K

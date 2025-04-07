@@ -83,6 +83,7 @@ In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 obs
 
 ##KNN
 
+In this part, we will use the KNN method. KNN is a non-parametric method where a data point is classified based on the majority vote of its K nearest neighbors in the feature space. The choice of K is crucial for performance. This is why the first thing is to find the best K
 
 ```{r}
 data$HeartDisease <- as.factor(data$HeartDisease)
@@ -140,7 +141,8 @@ cat("Best k chosen by CV:", best_k)
 
 
 ```
-
+The best k was selected based on accuracy which is the proportion of correctly classified test samples.We have also the misclassification error: 1 − Accuracy
+ which shows how often the model misclassifies. Under, we show the results (confusion matrix, accuracy and misclassification error) for the best K.
 
 ```{r}
 y_pred <- knn(
@@ -163,7 +165,7 @@ cat("Misclassification Error:", round(misclass_error, 4), "\n")
 
 
 ```
-
+Now, lets find the K which gives the smallest error
 ```{r}
 library(ggplot2)
 
@@ -223,9 +225,11 @@ class_1 <- which(knn == "0")
 knn_prob[class_1] <- 1 - knn_prob[class_1]
 
 # Display the probabilities for the class '1' (heart disease)
-knn_prob
+#If you want to display the probabilities, uncomment the line under "knn_prob"
+#knn_prob
 
 ```
+The K-Nearest Neighbors (KNN) model performed well in predicting heart disease, achieving an accuracy of about 87.5%. It correctly classified 75 healthy patients and 86 with heart disease, with 23 total misclassifications. We also examined the model’s predicted probabilities for class “1” (heart disease). High probabilities (e.g., 0.92 or 1.00) indicate strong confidence in a positive diagnosis, while low values (e.g., 0.00) suggest high confidence in a negative one. Intermediate values reflect uncertainty. These probabilities help assess how confident the model is in its predictions, which is especially useful in borderline cases.
 
 ## Logistic Regression
 

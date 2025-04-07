@@ -48,8 +48,8 @@ library("rmarkdown")
 
 ## Descriptive data analysis/statistics
 ```{r}
+library(readr)
 data <- read.csv("./heart.csv")
-
 #head(data)
 
 #summary(data)
@@ -338,6 +338,8 @@ In this part, we used a variety of tree-based classification methods to predict 
 
 Each method was applied to the same training and test dataset using the HeartDisease target variable.
 
+**Decision Trees**
+
 We will first show a representation of the initial tree.
 The decision trees recursively split the data based on features that reduce impurity. It is easy to interpret and visualize, and it is a fast training, but there is a chance of overfitting, that is why we are going to do pruning just after.
 
@@ -364,17 +366,7 @@ print(paste("Classification Error Rate:", round(error_rate, 4)))
 
 The first error rate that we obtain with this method is not bad, we are way under 0.5, but it is still not low enough to consider that we have a good prediction. We would like the error value to be lowest possible.
 
-```{r specific tree, echo=FALSE, results='hide'}
-# creation of a tree with specific variables
-library(tree)
-data_tree2 = tree(HeartDisease ~ Cholesterol + Age, 
-                   data=train_data, 
-                   control = tree.control(nrow(train_data), mincut=2, minsize=4, mindev=0.001))
-#plot(data_tree2)
-#text(data_tree2,cex=0.8)
-```
-
-After, we are trying to prune the tree, so we are trying to see if we should stop the tree earlier to have better results, because there could be an overfitting.
+After, to evoid overfitting as we said before, we are trying to prune the tree, so we are trying to see if we should stop the tree earlier to have better results, because there could be an overfitting.
 
 ```{r, echo=FALSE}
 par(mfrow = c(1, 2)) 
@@ -401,7 +393,9 @@ print(paste("Classification Error Rate:", round(error_rate, 4)))
 ```
 Indeed, a tree with 7 leaves performs best and we see that the error is lower than with the normal tree.
 
-Now, we will split the data with the cross entropy and after the Gini index.
+**Decision Trees with Gini vs. Entropy Splitting**
+
+Now, we will split the data with the cross entropy and after the Gini index. The cross entropy will give more pure nodes but it can lead to bigger trees, the Gini split goes faster.
 
 ```{r}
 tree.data <- tree(HeartDisease ~ ., data = train_data, split = "deviance") # cross entropy
@@ -440,14 +434,17 @@ print(paste("Classification Error Rate:", round(error_rate, 4)))
 ```
 Indeed, now we see that the prediction is better for the split with the cross entropy method than for the Gini index.
 
-Now, we will use more complex methods like adaboost, the bagging and random forest methods to try having the lowest error possible.
+Now, we will use more complex methods like Adaboost, the bagging and random forest methods to try having the lowest error possible.
+
+**Bagging**
+
+Bagging generates multiple bootstrap samples, fits a tree on each, and aggregates predictions via majority voting. It reduces variance and handles overfitting better than a single tree, as we have seen before, but it is more difficult to interpret and it requires more computation.
 
 ```{r, echo=FALSE}
 library(randomForest)
 set.seed(123)
 ```
 ```{r}
-#BAGGING
 bag_model <- randomForest(HeartDisease ~ ., data = train_data,
                           mtry = 10, ntree = 500, importance = TRUE)
 
@@ -461,8 +458,11 @@ err_bag <- 1 - sum(diag(conf_bag)) / sum(conf_bag)
 cat("Classification error (Bagging) :", round(err_bag, 4), "\n")
 ```
 
+**Random Forest**
+
+Random forest is a particular case of bagging, but each tree considers only a random subset of features when splitting. As a consequence, there is less correlation among trees, so there is a better performance, and it handles high-dimensional data well. As Random forest, it has as a weakness a difficult interpretation and moreover, it can be slow with many trees.
+
 ```{r}
-#RANDOM FOREST
 set.seed(123)
 rf_model <- randomForest(HeartDisease ~ ., data = train_data,
                          mtry = 3, ntree = 500, importance = TRUE)
@@ -476,15 +476,12 @@ print(conf_rf)
 err_rf <- 1 - sum(diag(conf_rf)) / sum(conf_rf)
 cat("Classification error (Random Forest) :", round(err_rf, 4), "\n")
 ```
-```{r, echo=FALSE}
-par(mfrow = c(1, 2))
-varImpPlot(bag_model, main = "Bagging (mtry = 10)", pch = 20)
-varImpPlot(rf_model, main = "Random Forest (mtry = 3)", pch = 20)
-par(mfrow = c(1, 1))
-```
-Both of the methods are giving a lower error value than previously, but the random forest is still better. Moreover, we see that the two methods don't have exactly the same order of the more important parameters to predict the disease of the heart, but it is still quite the same. It seems that ST slope is the most important factor to predict the heart disease, then Cholesterol and type of the chest pain are also very important.
 
-We will finally use the Ada Boost method.
+Both of the methods are giving a lower error value than previously, but the random forest is still better.
+
+**AdaBoost**
+
+We will finally use the Ada Boost method. It focuses on misclassified points by reweighting the dataset at each iteration to improve the weak learners. It has good performance on complex datasets and it reduces both bias and variance. But it can be sensitive to noisy data and it is quite slow.
 
 ```{r, echo=FALSE}
 library(ada)
@@ -502,9 +499,17 @@ error_ada <- 1 - sum(diag(confMat_ada$table)) / sum(confMat_ada$table)
 print(error_ada)
 ```
 
-Ada Boost gives a low error but the random forest method is a little bit better.
+Ada Boost gives a low error but the random forest method is a little bit better, maybe it is because our dataset in this analyse is not so complex.
 
 To conclude on all the tree methods that we tried, the random forest is the one that can predict the lower error.
+
+```{r, echo=FALSE}
+par(mfrow = c(1, 2))
+varImpPlot(rf_model, main = "Random Forest", pch = 20)
+par(mfrow = c(1, 1))
+```
+
+And here are the more important parameters to predict the heart disease fro the tree method which has the lowest error. It seems that ST slope is the most important factor to predict the heart disease, then Cholesterol and type of the chest pain are also very important.
 
 ```{r parameter tuning, results='hide', echo=FALSE}
 library(gbm) # for original implementation of regular and stochastic GBMs
@@ -580,6 +585,44 @@ We tried the parameters tuning and the XGBoost too, but the results were not goo
 
 Table of comparison of all the misclassification error :
 
+
+We are going to see a representation of all the ROC curves together.
+```{r, echo=FALSE}
+library(pROC)
+par(mar = c(5, 5, 4, 8), xpd = TRUE)
+tree.prob <- predict(data_tree, newdata = test_data, type = "vector")[,2]  #
+roc.tree <- roc(test_data$HeartDisease, tree.prob)
+
+prune.prob <- predict(prune.data, newdata = test_data, type = "vector")[,2]
+roc.prune <- roc(test_data$HeartDisease, prune.prob)
+
+bag.prob <- predict(bag_model, newdata = test_data, type = "prob")[,2]
+roc.bag <- roc(test_data$HeartDisease, bag.prob)
+
+rf.prob <- predict(rf_model, newdata = test_data, type = "prob")[,2]
+roc.rf <- roc(test_data$HeartDisease, rf.prob)
+
+ada.prob <- predict(r.ada, newdata = test_data, type = "prob")[,2]
+roc.ada <- roc(test_data$HeartDisease, ada.prob)
+
+plot(roc.tree, col = "blue", lwd = 2, main = "ROC curves - Comparison of methods")
+
+lines(roc.prune, col = "darkgreen", lwd = 2)
+lines(roc.bag, col = "orange", lwd = 2)
+lines(roc.rf, col = "red", lwd = 2)
+lines(roc.ada, col = "purple", lwd = 2)
+
+legend("topright", inset = c(-0.35, 0), legend = c("Simple tree", "Pruning tree", "Bagging", "Random Forest", "AdaBoost"),
+       col = c("blue", "darkgreen", "orange", "red", "purple"),
+       lwd = 2, bty = "n", cex = 0.9)
+par(mar = c(5, 4, 4, 2) + 0.1)
+cat("AUC Simple Tree :", auc(roc.tree), "\n")
+cat("AUC Pruning tree :", auc(roc.prune), "\n")
+cat("AUC Bagging :", auc(roc.bag), "\n")
+cat("AUC Random Forest :", auc(roc.rf), "\n")
+cat("AUC AdaBoost :", auc(roc.ada), "\n")
+
+```
 
 The most important parameters are as a consequence :
 

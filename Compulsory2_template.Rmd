@@ -46,14 +46,15 @@ library("rmarkdown")
 # Introduction
 
 
-## Descriptive data analysis/statistics
-```{r}
+# Descriptive data analysis/statistics
+
+First, we will pre process the data by standardizing the numeric columns, the dataset was clean, without missing values.
+
+```{r, echo=FALSE}
 library(readr)
 data <- read.csv("./heart.csv")
 #head(data)
-
 #summary(data)
-
 set.seed(123)
 ```
 
@@ -64,14 +65,10 @@ numeric_columns <- sapply(data, is.numeric)
 numeric_columns["HeartDisease"] <- FALSE
 print(numeric_columns)
 data[numeric_columns] <- scale(data[numeric_columns])
-
-
-
-summary(data)
+#summary(data)
 ```
 
 ```{r}
-
 data[] <- lapply(data, function(x) {
   if (is.character(x) || is.factor(x)) {
     as.numeric(factor(x)) - 1  
@@ -79,20 +76,19 @@ data[] <- lapply(data, function(x) {
     x
   }
 })
-
 str(data)
 ```
+
+In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.
+
 ##KNN
 
 
 ```{r}
 data$HeartDisease <- as.factor(data$HeartDisease)
-
-
 split <- sample(1:nrow(data), size = 0.8 * nrow(data))
 train_data <- data[split, ]
 test_data <- data[-split, ] # or validation if cv
-
 ```
 
 ```{r}
@@ -585,6 +581,18 @@ We tried the parameters tuning and the XGBoost too, but the results were not goo
 
 Table of comparison of all the misclassification error :
 
+
+| Method              | Misclassification error |
+|---------------------|-------------------------|
+| KNN                 | 0.                    |
+| Logistic Regression | 0.                    |
+| Decision Tree       | 0.1739                  |
+| Pruning Tree        | 0.1685                  |
+| Entropy             | 0.1739                  |
+| Gini                | 0.2554                  |
+| Bagging             | 0.1576                  |
+| Random Forest       | 0.1413                  |
+| AdaBoost            | 0.1576                  |
 
 We are going to see a representation of all the ROC curves together.
 ```{r, echo=FALSE}

@@ -52,7 +52,7 @@ First, we will pre process the data by standardizing the numeric columns, the da
 
 ```{r, echo=FALSE}
 library(readr)
-data <- read.csv("./heart.csv")
+data <- read.csv("~/heart.csv")
 #head(data)
 #summary(data)
 set.seed(123)
@@ -83,7 +83,6 @@ In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 obs
 
 ##KNN
 
-In this part, we will use the KNN method. KNN is a non-parametric method where a data point is classified based on the majority vote of its K nearest neighbors in the feature space. The choice of K is crucial for performance. This is why the first thing is to find the best K
 
 ```{r}
 data$HeartDisease <- as.factor(data$HeartDisease)
@@ -141,8 +140,7 @@ cat("Best k chosen by CV:", best_k)
 
 
 ```
-The best k was selected based on accuracy which is the proportion of correctly classified test samples.We have also the misclassification error: 1 − Accuracy
- which shows how often the model misclassifies. Under, we show the results (confusion matrix, accuracy and misclassification error) for the best K.
+
 
 ```{r}
 y_pred <- knn(
@@ -165,7 +163,7 @@ cat("Misclassification Error:", round(misclass_error, 4), "\n")
 
 
 ```
-Now, lets find the K which gives the smallest error
+
 ```{r}
 library(ggplot2)
 
@@ -225,23 +223,35 @@ class_1 <- which(knn == "0")
 knn_prob[class_1] <- 1 - knn_prob[class_1]
 
 # Display the probabilities for the class '1' (heart disease)
-#If you want to display the probabilities, uncomment the line under "knn_prob"
-#knn_prob
+knn_prob
 
 ```
-The K-Nearest Neighbors (KNN) model performed well in predicting heart disease, achieving an accuracy of about 87.5%. It correctly classified 75 healthy patients and 86 with heart disease, with 23 total misclassifications. We also examined the model’s predicted probabilities for class “1” (heart disease). High probabilities (e.g., 0.92 or 1.00) indicate strong confidence in a positive diagnosis, while low values (e.g., 0.00) suggest high confidence in a negative one. Intermediate values reflect uncertainty. These probabilities help assess how confident the model is in its predictions, which is especially useful in borderline cases.
 
 ## Logistic Regression
 
-- how its works, strenght weakness
+The logistic regression model is commonly used for binary classification problems that try to predict one out of two possible outcomes : presence or absence of heart disease. 
+It estimates the probability that a given input point belongs to a particular class by estimating optimal weight of the input variables using the logistic function, which maps real-valued inputs to a range between 0 and 1. 
+\[
+P(y = 1 \mid x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x_1 + \dots + \beta_n x_n)}}
+\]
 
+Where:
 
-```{r}
+- \( P(y = 1 \mid x) \) is the probability of the output class (e.g., having heart disease),
+- \( x_1, \dots, x_n \) are the input feature,
+- \( \beta_0, \dots, \beta_n \) are the model parameters (learned from the data).
+
+One of the strengths of this model is that it returns the probability of the variable to be 1, meaning that it gives more information on the reliability of the prediction. 
+
+```{r, echo= FALSE}
 model <- glm(HeartDisease ~ ., data = train_data, family = binomial)
 summary(model)
 ```
+Fitting the model on all of the input variables in the train dataset we can observe that some of them have a very high p-value (for example : 0.72 for RestingBP). Meaning that we can't reject the null hypothesis $H_0$ that the parameter associated to these variables is 0. These variables might not be useful to make the prediction model.
 
-```{r}
+If we observe clear overfitting in the results it would then be smart to try the model without these irrelevant variables.
+
+```{r, echo = FALSE}
 predictions <- predict(model, test_data, type = "response")
 
 # if the probability is > 0.5, predict heart_disease.
@@ -267,10 +277,14 @@ print(paste("Precision:", round(precision * 100, 2), "%"))
 recall <- TP / (TP + FN)
 print(paste("Recall:", round(recall * 100, 2), "%"))
 ```
+Using the treshold of 0.5 to decide if the model predicts a heart disease or not. We obtain by comparing the predictions of the model to the real values in the test dataset an accuracy of 89 %.
+
+Looking at the confusion matrix, we can observe that the default of this model lies on a high amount of false positive. Meaning that there is a high precision with a lower recall. 
+This is fine considering that in a heart disease detection problem it is way better to 
 
 
-
-```{r}
+We can now plot the train vs error curve to see the convergence of the training error versus the test error on different sample sizes for the training.
+```{r, echo=FALSE}
 # train test curve
 library(ggplot2)
 
@@ -313,8 +327,10 @@ ggplot(error_data, aes(x = TrainSize, y = Error, color = Set)) +
   labs(title = "Train vs. Test Error Curve", x = "Training Set Proportion", y = "Error (1 - Accuracy)") +
   theme_minimal()
 ```
+Here, we can observe that the test error sees to converge and is much lower than the train error. The model here seems to train well without overfitting on the data as the test error remains lower.
 
-```{r}
+Let's now have a look at the probability distribution that is predicted versus the actual class of each of the cases to predict.
+```{r, echo=FALSE}
 ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
   geom_density(alpha = 0.5) +
   labs(title = "Predicted Probabilities Distribution",
@@ -322,6 +338,10 @@ ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
        fill = "Actual Class") +
   theme_minimal()
 ```
+Here, we can observe that when the model tries to predict that the patient has heart disease it is often more confident about its predictions than for the opposite. 
+
+This shows that the model is less likely to get true negatives right, as we saw previously, the recall is indeed a bit lower than the precision for this model.
+
 
 
 ## Tree based methods
@@ -588,8 +608,8 @@ Table of comparison of all the misclassification error :
 
 | Method              | Misclassification error |
 |---------------------|-------------------------|
-| KNN                 | 0.1359                  |
-| Logistic Regression | 0.                    |
+| KNN                 | 0.                    |
+| Logistic Regression | 0.1087                  |
 | Decision Tree       | 0.1739                  |
 | Pruning Tree        | 0.1685                  |
 | Entropy             | 0.1739                  |
@@ -617,15 +637,19 @@ roc.rf <- roc(test_data$HeartDisease, rf.prob)
 ada.prob <- predict(r.ada, newdata = test_data, type = "prob")[,2]
 roc.ada <- roc(test_data$HeartDisease, ada.prob)
 
+glm.prob <- predict(tree.data, test_data, type="vector")[,2]
+roc.glm <- roc(test_data$HeartDisease, glm.prob)
+
 plot(roc.tree, col = "blue", lwd = 2, main = "ROC curves - Comparison of methods")
 
 lines(roc.prune, col = "darkgreen", lwd = 2)
 lines(roc.bag, col = "orange", lwd = 2)
 lines(roc.rf, col = "red", lwd = 2)
 lines(roc.ada, col = "purple", lwd = 2)
+lines(roc.glm, col = "yellow", lwd = 2)
 
-legend("topright", inset = c(-0.35, 0), legend = c("Simple tree", "Pruning tree", "Bagging", "Random Forest", "AdaBoost"),
-       col = c("blue", "darkgreen", "orange", "red", "purple"),
+legend("topright", inset = c(-0.35, 0), legend = c("Simple tree", "Pruning tree", "Bagging", "Random Forest", "AdaBoost", "Logistic"),
+       col = c("blue", "darkgreen", "orange", "red", "purple", "yellow"),
        lwd = 2, bty = "n", cex = 0.9)
 par(mar = c(5, 4, 4, 2) + 0.1)
 cat("AUC Simple Tree :", auc(roc.tree), "\n")
@@ -633,7 +657,7 @@ cat("AUC Pruning tree :", auc(roc.prune), "\n")
 cat("AUC Bagging :", auc(roc.bag), "\n")
 cat("AUC Random Forest :", auc(roc.rf), "\n")
 cat("AUC AdaBoost :", auc(roc.ada), "\n")
-
+cat("AUC Logistic :", auc(roc.glm), "\n")
 ```
 
 The most important parameters are as a consequence :

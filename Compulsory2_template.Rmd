@@ -70,8 +70,9 @@ numeric_columns <- sapply(data, is.numeric)
 numeric_columns["HeartDisease"] <- FALSE
 print(numeric_columns)
 data[numeric_columns] <- scale(data[numeric_columns])
-#summary(data)
+summary(data)
 ```
+Here is a summary of the data, where we can see measures such as mean, median and range.
 
 ```{r}
 data[] <- lapply(data, function(x) {
@@ -81,7 +82,7 @@ data[] <- lapply(data, function(x) {
     x
   }
 })
-str(data)
+#str(data)
 ```
 
 In this dataset, there are 12 columns, so 12 parameters and 918 rows, so 918 observations. We have quantitative parameters, which are : Age, RestingBP, Cholesterol, MaxHR and OldPeak. The qualitative parameters are Sex, ChestPainType, FastingBS, RestingECG, ExerciseAngina, ST_Slope and HeartDisease.

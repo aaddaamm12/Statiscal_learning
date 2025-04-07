@@ -1,7 +1,7 @@
 ---
 title: "Compulsory Exercise 2: Title (give your project an informative title)"
 author:
-- Full name for group member \#1.
+- Adam DJAROUD \#1.
 - Full name for group member \#2.
 - Full name for group member \#3.
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -46,14 +46,18 @@ library("rmarkdown")
 # Introduction
 
 
-# Descriptive data analysis/statistics
+## Descriptive data analysis/statistics
 ```{r}
-data <- read.csv("~/heart.csv")
+data <- read.csv("./heart.csv")
 
 #head(data)
 
 #summary(data)
+
+set.seed(123)
 ```
+
+
 ```{r}
 # standardization of numeric columns
 numeric_columns <- sapply(data, is.numeric)
@@ -65,6 +69,7 @@ data[numeric_columns] <- scale(data[numeric_columns])
 
 summary(data)
 ```
+
 ```{r}
 
 data[] <- lapply(data, function(x) {
@@ -77,16 +82,8 @@ data[] <- lapply(data, function(x) {
 
 str(data)
 ```
+##KNN
 
-# Methods
-
-In this part, we are going to use three types of methods : KNN, logistic regression and tree based methods.
-
-For each methods, we will use the misclassification error.
-
-##KNN(pour moi)
-
-- how its works, strenght weakness
 
 ```{r}
 data$HeartDisease <- as.factor(data$HeartDisease)
@@ -98,6 +95,141 @@ test_data <- data[-split, ] # or validation if cv
 
 ```
 
+```{r}
+library(caret)
+library(class)
+library(dplyr)
+
+X_train <- train_data[, colnames(train_data) != "HeartDisease"]
+y_train <- train_data$HeartDisease
+
+X_train <- data.frame(lapply(X_train, function(x) {
+  if (is.character(x) || is.factor(x)) {
+    as.numeric(factor(x))
+  } else {
+    x
+  }
+}))
+
+
+X_test <- test_data[, colnames(test_data) != "HeartDisease"]
+y_test <- test_data$HeartDisease
+
+X_test <- data.frame(lapply(X_test, function(x) {
+  if (is.character(x) || is.factor(x)) {
+    as.numeric(factor(x))
+  } else {
+    x
+  }
+}))
+
+
+# Cross-validation to find the best k
+set.seed(123)
+
+k_grid <- data.frame(k = 1:20)
+ctrl <- trainControl(method = "cv", number = 10)
+
+knn_cv <- train(
+  x = X_train,
+  y = y_train,
+  method = "knn",
+  tuneGrid = k_grid,
+  trControl = ctrl,
+  metric = "Accuracy"
+)
+
+best_k <- knn_cv$bestTune$k
+cat("Best k chosen by CV:", best_k)
+
+
+```
+
+
+```{r}
+y_pred <- knn(
+  train = X_train,
+  test = X_test,
+  cl = y_train,
+  k = best_k,
+  prob = TRUE
+)
+
+conf_mat <- confusionMatrix(y_pred, as.factor(y_test))
+print(conf_mat)
+
+accuracy <- conf_mat$overall["Accuracy"]
+cat("Accuracy:", round(accuracy, 4), "\n")
+
+misclass_error <- 1 - accuracy
+cat("Misclassification Error:", round(misclass_error, 4), "\n")
+
+
+
+```
+
+```{r}
+library(ggplot2)
+
+# Find the K which gives the smallest error
+
+K <- 30
+knn.error <- rep(NA, K)
+
+set.seed(321)
+
+for (k in 1:K) {
+  knn.pred <- knn(train = X_train,
+                  test = X_test,
+                  cl = y_train,
+                  k = k)
+  
+  knn.error[k] <- mean(knn.pred != y_test)
+}
+
+k_min_error <- which.min(knn.error)
+min_error_value <- knn.error[k_min_error]
+
+knn.error.df <- data.frame(k = 1:K, error = knn.error)
+
+# Plot the error against the value of K
+ggplot(knn.error.df, aes(x = k, y = error)) +
+  geom_point(col = "blue") +
+  geom_line(linetype = "dotted") +
+  labs(title = "KNN Classification Error vs. Number of Neighbors",
+       x = "Number of Neighbors (k)",
+       y = "Classification Error") +
+  theme_minimal()
+
+cat("The best k for minimum error is k =", k_min_error, "with a classification error of", round(min_error_value, 4), "\n")
+
+```
+
+
+```{r}
+
+set.seed(123)
+
+knn <- knn(train = X_train,
+             test = X_test,
+             cl = y_train,
+             k = k_min_error,
+             prob = TRUE)
+
+table(knn, y_test)
+
+knn_prob <- attributes(knn)$prob
+
+# If the prediction is "1" (heart disease), then we keep the probability associated with "1"
+# If the prediction is "0" (no heart disease), we modify the probability associated with "0" to give the probability of being sick
+# Since the model predicts "0" or "1", we need to reverse the probability for the "0" class (no disease)
+class_1 <- which(knn == "0")
+knn_prob[class_1] <- 1 - knn_prob[class_1]
+
+# Display the probabilities for the class '1' (heart disease)
+knn_prob
+
+```
 
 ## Logistic Regression
 

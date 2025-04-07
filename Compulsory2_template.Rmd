@@ -326,12 +326,21 @@ ggplot(test_data, aes(x = predictions, fill = factor(HeartDisease))) +
 
 ## Tree based methods
 
-In this part, we will use methods related to trees. We will take the variable "HeartDisease" as a target variable, and all the other variables are predictors.
+In this part, we used a variety of tree-based classification methods to predict the presence of heart disease from medical data, and the ones we will present in this report are :
 
-- how its works, strenght weakness
+- Decision Trees (with and without pruning)
 
+- Bagging
+
+- Random Forests
+
+- AdaBoost
+
+Each method was applied to the same training and test dataset using the HeartDisease target variable.
 
 We will first show a representation of the initial tree.
+The decision trees recursively split the data based on features that reduce impurity. It is easy to interpret and visualize, and it is a fast training, but there is a chance of overfitting, that is why we are going to do pruning just after.
+
 ```{r, echo=FALSE}
 # Visualization of the tree
 set.seed(123)

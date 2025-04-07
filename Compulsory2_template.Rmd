@@ -1,9 +1,9 @@
 ---
 title: "Compulsory Exercise 2: Title (give your project an informative title)"
 author:
-- Adam DJAROUD \#1.
-- Full name for group member \#2.
-- Full name for group member \#3.
+- Adam DJAROUD
+- Antoine REILHES
+- Flavie BERTRAND
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 header-includes: 
   - \usepackage{amsmath}
@@ -20,7 +20,9 @@ output:
     toc: no
     toc_depth: '2'
 urlcolor: blue
-abstract: "This is the place for your abstract (max 350 words)"
+abstract: "The objective of this project is to identify the most important medical parameters that help predict whether an individual has a heart disease or not. This question is important concerning early detection and intervention of the disease. To respond to this purpose, we worked with a dataset of 918 observations and a variety of medical parameters. We applied and compared several classification models, including the K nearest neighbors, logistic regression and trees methods. We evaluated the methods using classification error rates, confusion matrices, and ROC curves to measure and compare performance.
+In this study, the best model was able to predict heart disease with 89% accuracy using medical data. These results are highly significant to healthcare professionals and data scientists, as machine learning methods are shown here to be able to provide a reliable framework for detection of heart disease. 
+This study hints towards the best methods to further investigate in order to have the best predictions in the future."
 ---
   
 ```{r setup, include=FALSE}
@@ -45,11 +47,13 @@ library("knitr")
 library("rmarkdown")
 ```
 
-# Abstract
-
 
 # Introduction
 
+The problem of our project is to determine important parameters to know if someone has a heart disease. To do it, we will use a dataset of 918 observations, with different parameters such as the age, the cholesterol rate, the shape of the ST segment and other medical parameters. By studying this data, we hope to build a pre-diagnosis model that is able to evaluate if a person is likely to have a heart disease, to then be able to send him to specialised cardiologists for further diagnosis.
+The data set we used is provided by user Fedesoriano on Kaggle.
+This problem enters into the scope of supervised learning where the goal is to classify a binary output variable, here heart_disease. Classification machine learning methods typically used for binary classification will be compared to find the best predictor for this variable.
+The target audience for such models would be doctors, because the results could help them diagnose heart disease. It is also trying to discover the relations between heart disease and all the other parameters of the dataset which could be useful for further medical research on the causes of heart disease.
 
 # Descriptive data analysis/statistics
 
@@ -754,8 +758,15 @@ cat("AUC AdaBoost :", auc(roc.ada), "\n")
 cat("AUC Logistic :", auc(roc.glm), "\n")
 ```
 
-The most important parameters are as a consequence :
+For this study the main metric that was used is accuracy. However, in this particular context a false positive doesn’t have the same severity as a false negative.
+A false positive is less of a serious issue than a false negative : for instance, since the predictive tool here is a pre-diagnosis tool, predicting a false negative is not really impactful. The patient would then be brought for further analysis and experts could detect that he is healthy. 
+However, in the case of a false negative, the patient's disease wouldn’t be noticed which could lead to a worse state. 
 
-Limitations : 
+Meaning that some errors here are way more important than others, this is why a more complete model comparison should be more based on finding a model with high precision, another approach would be to compare the models using a f_beta metric with beta<1 to favor precision.
+
 
 # Summary
+
+In conclusion, our machine learning approaches were able globally to successfully predict the state of a patient using its medical data. This work contributes to the field of predictive healthcare analytics and supports the development of better predictive tools by giving methods to investigate further in future studies.
+In this study, we found that the best model is the logistic regression model, it gives an accuracy of 89% with high precision (~94%). This model is very interesting because of its high precision meaning that it doesn’t give a lot of false negatives. This is a highly valuable characteristic in the context of predicting a disease as false negative errors are the most unwanted.
+Despite high accuracy results, statistical predictive methods should remain decision helping tools and should never be used by themselves in medical context but always with the expertise of a doctor. Still, these models could truly be used to improve the quality of diagnosis or pre-diagnosis by medical experts globally.
